@@ -1,12 +1,10 @@
-﻿using static Blackjack.Role;
-
-namespace Blackjack;
+﻿namespace Blackjack;
 
 public sealed class Game
 {
     readonly Deck _deck = new();
-    readonly Player _you = new(You);
-    readonly Player _dealer = new(Dealer);
+    readonly Player _you = new();
+    readonly Player _dealer = new();
 
     public void Start()
     {
@@ -23,7 +21,7 @@ public sealed class Game
     public void Deal()
     {
         _you.Give(_deck.Top());
-        _dealer.Give(_deck.Top());
+        _dealer.Give(_deck.Top().FaceDown());
         _you.Give(_deck.Top());
         _dealer.Give(_deck.Top());
     }
