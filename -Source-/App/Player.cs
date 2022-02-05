@@ -25,6 +25,14 @@ public sealed class Player
                 sb.Append($"and {_hand[i]}.");
         return sb.ToString();
     }
+
+    public void Give(Card card) => Give(card, out var _, out var _);
+    public void Give(Card card, out bool didWin) => Give(card, out didWin, out var _);
+    public void Give(Card card, out bool didWin, out bool didLose)
+    {
+        _hand.Add(card);
+        didWin = Total() == 21;
+        didLose = Total() > 21;
+    }
     
-    public void Give(Card card) => _hand.Add(card);
 }

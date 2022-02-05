@@ -2,6 +2,7 @@
 
 namespace Blackjack;
 
+// TODO: Figure out Aces.
 public sealed class Card
 {
     public readonly int Value;
@@ -13,6 +14,13 @@ public sealed class Card
         _name = name;
         Value = value;
         _isHidden = isHidden;
+    }
+
+    public Card(Card card)
+    {
+        _name = card._name;
+        Value = card.Value;
+        _isHidden = card._isHidden;
     }
     
     public override string ToString()

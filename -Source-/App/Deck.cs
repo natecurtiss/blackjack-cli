@@ -30,7 +30,7 @@ public sealed class Deck
         };
         foreach (var card in suit)
             for (var i = 0; i < suits; i++)
-                _cards.Add(card);
+                _cards.Add(new(card));
     }
 
     public void Shuffle() => _cards.Shuffle();
