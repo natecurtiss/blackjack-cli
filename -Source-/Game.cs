@@ -9,22 +9,23 @@ public sealed class Game
     public void Start()
     {
         Shuffle();
+        Shuffle();
+        Shuffle();
         Deal();
-        Console.WriteLine(_player.Cards());
-        Console.WriteLine(_dealer.Cards());
+        ShowPlayerHand();
+        ShowDealerHand();
     }
 
-    void Shuffle()
-    {
-        for (var i = 0; i < 3; i++)
-            _deck.Shuffle();
-    }
+    public void Shuffle() => _deck.Shuffle();
 
-    void Deal()
+    public void Deal()
     {
         _player.Give(_deck.Top());
         _dealer.Give(_deck.Top());
         _player.Give(_deck.Top());
         _dealer.Give(_deck.Top());
     }
+
+    public void ShowPlayerHand() => Console.WriteLine($"You have {_player.Cards()}");
+    public void ShowDealerHand() => Console.WriteLine($"Dealer has {_dealer.Cards()}");
 }
