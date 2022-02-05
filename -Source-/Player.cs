@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using static Blackjack.Role;
 
 namespace Blackjack;
 
@@ -8,7 +9,7 @@ public sealed class Player
     readonly bool _isDealer;
     readonly string _faceDown = "a face-down card";
 
-    public Player(bool isDealer = false) => _isDealer = isDealer;
+    public Player(Role type) => _isDealer = type == Dealer;
 
     public int Total() => _hand.Sum(card => (int) card);
     public string Cards()
@@ -41,5 +42,6 @@ public sealed class Player
         }
         return sb.ToString();
     }
+    
     public void Give(Card card) => _hand.Add(card);
 }
