@@ -1,6 +1,6 @@
 ﻿namespace Blackjack;
 
-static class ListExtensions
+public static class ListExtensions
 {
     static readonly Random _random = new();
     
