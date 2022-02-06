@@ -2,7 +2,6 @@
 
 namespace Blackjack;
 
-// TODO: Figure out Aces.
 public sealed class Card
 {
     public readonly int PrimaryValue;
@@ -34,12 +33,12 @@ public sealed class Card
         return $"a {_name}";
     }
 
-    public Card Clone() => new(_name, PrimaryValue, SecondaryValue);
     public Card FaceDown()
     {
         Hide();
         return this;
     }
+    public Card Clone() => new(_name, PrimaryValue, SecondaryValue);
     public void Show() => _isHidden = false;
-    public void Hide() => _isHidden = true;
+    void Hide() => _isHidden = true;
 }

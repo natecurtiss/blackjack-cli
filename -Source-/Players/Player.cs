@@ -2,13 +2,13 @@
 
 namespace Blackjack;
 
-public sealed class Player
+public abstract class Player
 {
-    readonly List<Card> _hand = new();
+    protected readonly List<Card> _hand = new();
 
     public void Reset() => _hand.Clear();
 
-    public int Total()
+    public int CardsTotal()
     {
         var primaryTotal = _hand.Sum(card => card.PrimaryValue);
         var secondaryTotal = _hand.Sum(card => card.SecondaryValue);
@@ -16,7 +16,8 @@ public sealed class Player
             return secondaryTotal;
         return primaryTotal;
     }
-    public string Cards()
+    
+    public string CardNames()
     {
         var cards = _hand.Count;
         var last = cards - 1;
@@ -37,11 +38,11 @@ public sealed class Player
 
     public void Give(Card card) => Give(card, out var _, out var _);
     public void Give(Card card, out bool didWin) => Give(card, out didWin, out var _);
-    public void Give(Card card, out bool didWin, out bool didLose)
+    public virtual void Give(Card card, out bool didWin, out bool didLose)
     {
         _hand.Add(card);
-        didWin = Total() == 21;
-        didLose = Total() > 21;
+        didWin = CardsTotal() == 21;
+        didLose = CardsTotal() > 21;
     }
     
 }
