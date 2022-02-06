@@ -6,10 +6,7 @@ public sealed class Player
 {
     readonly List<Card> _hand = new();
 
-    public void Reset()
-    {
-        _hand.Clear();
-    }
+    public void Reset() => _hand.Clear();
 
     public int Total()
     {

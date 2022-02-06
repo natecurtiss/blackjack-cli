@@ -1,3 +1,3 @@
 ﻿using Blackjack;
 
-new Game().Start();
+new Game(100).Start();

@@ -6,8 +6,14 @@ public sealed class Game
     readonly Player _you = new();
     readonly Player _dealer = new();
     Card _dealerSecondCard = new("null", 0);
+    int _balance;
+    int _pot;
     
-    public Game() => Console.Title = "Blackjack";
+    public Game(int startingBalance)
+    {
+        _balance = startingBalance;
+        Console.Title = "Blackjack";
+    }
 
     public void Start()
     {
@@ -15,21 +21,54 @@ public sealed class Game
         _deck.Reset();
         _you.Reset();
         _dealer.Reset();
+        _pot = 0;
+
+        Console.WriteLine($"How much would you like to bet? (Current balance is {_balance})");
+        while (true)
+            if (!int.TryParse(Console.ReadLine(), out var amount))
+            {
+                Console.WriteLine($"Invalid amount - How much would you like to bet? (Current balance is {_balance})");
+            }
+            else if (amount <= 0)
+            {
+                Console.WriteLine($"You have to bet something if you want to play - How much would you like to bet? (Current balance is {_balance})");
+            }
+            else if (amount > _balance)
+            {
+                Console.WriteLine($"You can't bet more than you have - How much would you like to bet? (Current balance is {_balance})");
+            }
+            else
+            {
+                _pot += amount;
+                _balance -= amount;
+                Console.WriteLine($"You bet {amount} (current balance is now {_balance})");
+                break;
+            }
+
         Shuffle();
         Shuffle();
         Shuffle();
         Deal(out var didPlayerWin, out var didDealerWin, out _dealerSecondCard);
-        if (didPlayerWin)
+        if (didPlayerWin && didDealerWin)
         {
-            // TODO: Player wins off deal.
+            Tie();
+        }
+        else if (didPlayerWin)
+        {
+            Naturals();
         }
         else if (didDealerWin)
         {
-            // TODO: Dealer wins off deal.
+            _dealerSecondCard.Show();
+            Lose();
         }
-        ShowYourHand(false);
-        ShowDealerHand(false, false);
-        PlayerTurn();
+        else
+        {
+            Console.WriteLine('\n');
+            ShowYourHand(false);
+            ShowDealerHand(false, false);
+            PlayerTurn();
+        }
     }
 
     void Shuffle() => _deck.Shuffle();
@@ -139,10 +178,19 @@ public sealed class Game
         _dealer.Give(card, out didWin, out didLose);
     }
 
+    void Naturals()
+    {
+        _balance += (int) (_pot * 1.5f);
+        Console.WriteLine($"\nYou won! You now have {_balance} chips");
+        ShowYourHand(true);
+        ShowDealerHand(true, true);
+        End();
+    }
+
     void Win()
     {
-        // TODO: Player win.
-        Console.WriteLine("\nYou win!");
+        _balance += _pot * 2;
+        Console.WriteLine($"\nYou won! You now have {_balance} chips");
         ShowYourHand(true);
         ShowDealerHand(true, true);
         End();
@@ -150,17 +198,19 @@ public sealed class Game
 
     void Lose()
     {
-        // TODO: Player lose.
-        Console.WriteLine("\nYou lose!");
+        Console.WriteLine($"\nYou lost! You now have {_balance} chips");
         ShowYourHand(true);
         ShowDealerHand(true, true);
-        End();
+        if (_balance <= 0)
+            Console.WriteLine("\nYou're out of cash. GAME OVER.");
+        else
+            End();
     }
 
     void Tie()
     {
-        // TODO: Draw.
-        Console.WriteLine("\nIt's a tie!");
+        _balance += _pot;
+        Console.WriteLine($"\nIt's a tie! You now have {_balance} chips");
         ShowYourHand(true);
         ShowDealerHand(true, true);
         End();
@@ -168,7 +218,7 @@ public sealed class Game
 
     void End()
     {
-        Console.WriteLine("Restart? (Y/N)");
+        Console.WriteLine("\nPlay again? (Y/N)");
         while (true)
         {
             var response = Console.ReadLine()?.ToLower();
@@ -177,7 +227,7 @@ public sealed class Game
             else if (response == "n")
                 break;
             else
-                Console.WriteLine("Invalid response - Restart? (Y/N)");
+                Console.WriteLine("Invalid response - Play again? (Y/N)");
         }
     }
 }
