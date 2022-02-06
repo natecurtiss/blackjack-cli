@@ -5,8 +5,8 @@ public sealed class Game
     readonly Deck _deck = new();
     readonly You _you;
     readonly Dealer _dealer = new();
+    readonly Pot _pot = new();
     Card _dealerSecondCard = new("null", 0);
-    int _pot;
 
     public Game(int startingBalance)
     {
@@ -20,7 +20,6 @@ public sealed class Game
         _deck.Reset();
         _you.Reset();
         _dealer.Reset();
-        _pot = 0;
 
         Console.WriteLine($"How much would you like to bet? (Current balance is {_you.Chips})");
         while (true)
@@ -38,7 +37,7 @@ public sealed class Game
             }
             else
             {
-                _pot += amount;
+                _pot.Add(amount);
                 _you.Bet(amount, out var _, out var _);
                 Console.WriteLine($"You bet {amount} (current balance is now {_you.Chips})");
                 break;
@@ -179,7 +178,7 @@ public sealed class Game
 
     void Naturals()
     {
-        _you.Reward((int) (_pot * 1.5f));
+        _you.Reward((int) (_pot.Take() * 1.5f));
         Console.WriteLine($"\nYou won! You now have {_you.Chips} chips");
         ShowYourHand(true);
         ShowDealerHand(true, true);
@@ -188,7 +187,7 @@ public sealed class Game
 
     void Win()
     {
-        _you.Reward(_pot * 2);
+        _you.Reward(_pot.Take() * 2);
         Console.WriteLine($"\nYou won! You now have {_you.Chips} chips");
         ShowYourHand(true);
         ShowDealerHand(true, true);
@@ -208,7 +207,7 @@ public sealed class Game
 
     void Tie()
     {
-        _you.Reward(_pot);
+        _you.Reward(_pot.Take());
         Console.WriteLine($"\nIt's a tie! You now have {_you.Chips} chips");
         ShowYourHand(true);
         ShowDealerHand(true, true);
