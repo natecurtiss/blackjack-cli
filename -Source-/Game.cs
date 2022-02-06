@@ -6,40 +6,47 @@ public sealed class Game
     readonly You _you;
     readonly Dealer _dealer = new();
     readonly Pot _pot = new();
+
+    readonly Action _start;
+    readonly Action<string> _say;
+    readonly Func<string> _getInput;
+
     Card _dealerSecondCard = new("null", 0);
 
-    public Game(int startingBalance)
+    public Game(int startingBalance, Action onStart, Action<string> onSay, Func<string> onInput)
     {
         _you = new(startingBalance);
-        Console.Title = "Blackjack";
+        _start = onStart;
+        _say = onSay;
+        _getInput = onInput;
     }
 
     public void Start()
     {
-        Console.Clear();
+        _start();
         _deck.Reset();
         _you.Reset();
         _dealer.Reset();
 
-        Console.WriteLine($"How much would you like to bet? (Current balance is {_you.Chips})");
+        _say($"How much would you like to bet? (Current balance is {_you.Chips})");
         while (true)
-            if (!int.TryParse(Console.ReadLine(), out var amount))
+            if (!int.TryParse(_getInput(), out var amount))
             {
-                Console.WriteLine($"Invalid amount - How much would you like to bet? (Current balance is {_you.Chips})");
+                _say($"Invalid amount - How much would you like to bet? (Current balance is {_you.Chips})");
             }
             else if (amount <= 0)
             {
-                Console.WriteLine($"You have to bet something if you want to play - How much would you like to bet? (Current balance is {_you.Chips})");
+                _say($"You have to bet something if you want to play - How much would you like to bet? (Current balance is {_you.Chips})");
             }
             else if (amount > _you.Chips)
             {
-                Console.WriteLine($"You can't bet more than you have - How much would you like to bet? (Current balance is {_you.Chips})");
+                _say($"You can't bet more than you have - How much would you like to bet? (Current balance is {_you.Chips})");
             }
             else
             {
                 _pot.Add(amount);
                 _you.Bet(amount, out var _, out var _);
-                Console.WriteLine($"You bet {amount} (current balance is now {_you.Chips})");
+                _say($"You bet {amount} (current balance is now {_you.Chips})");
                 break;
             }
 
@@ -62,7 +69,7 @@ public sealed class Game
         }
         else
         {
-            Console.WriteLine('\n');
+            _say("\n");
             ShowYourHand(false);
             ShowDealerHand(false, false);
             PlayerTurn();
@@ -84,10 +91,10 @@ public sealed class Game
     {
         while (true)
         {
-            Console.WriteLine('\n');
+            _say("\n");
 
-            Console.WriteLine("Please enter a command (hit, stand, or hand).");
-            var command = Console.ReadLine()?.ToLower();
+            _say("Please enter a command (hit, stand, or hand).");
+            var command = _getInput().ToLower();
             if (command == "hand")
             {
                 ShowYourHand(false);
@@ -113,7 +120,7 @@ public sealed class Game
             }
             else
             {
-                Console.WriteLine("That's not a command, please enter a valid one.");
+                _say("That's not a command, please enter a valid one.");
             }
         }
     }
@@ -153,33 +160,33 @@ public sealed class Game
     void ShowYourHand(bool pastTense)
     {
         var possession = pastTense ? "had" : "have";
-        Console.WriteLine($"You {possession} {_you.CardNames()} ({_you.CardsTotal()})");
+        _say($"You {possession} {_you.CardNames()} ({_you.CardsTotal()})");
     }
     void ShowDealerHand(bool pastTense, bool showMissing)
     {
         var possession = pastTense ? "had" : "has";
         var total = showMissing ? _dealer.CardsTotal().ToString() : $"{_dealer.CardsTotal() - _dealerSecondCard.PrimaryValue} + ?";
-        Console.WriteLine($"Dealer {possession} {_dealer.CardNames()} ({total})");
+        _say($"Dealer {possession} {_dealer.CardNames()} ({total})");
     }
 
     void Hit(out bool didWin, out bool didLose)
     {
         var card = _deck.Top();
         _you.Give(card, out didWin, out didLose);
-        Console.WriteLine($"You drew {card}");
+        _say($"You drew {card}");
     }
 
     void DealerHit(out bool didWin, out bool didLose)
     {
         var card = _deck.Top();
-        Console.WriteLine($"Dealer drew {card}");
+        _say($"Dealer drew {card}");
         _dealer.Give(card, out didWin, out didLose);
     }
 
     void Naturals()
     {
         _you.Reward((int) (_pot.Take() * 1.5f));
-        Console.WriteLine($"\nYou won! You now have {_you.Chips} chips");
+        _say($"\nYou won! You now have {_you.Chips} chips");
         ShowYourHand(true);
         ShowDealerHand(true, true);
         End();
@@ -188,7 +195,7 @@ public sealed class Game
     void Win()
     {
         _you.Reward(_pot.Take() * 2);
-        Console.WriteLine($"\nYou won! You now have {_you.Chips} chips");
+        _say($"\nYou won! You now have {_you.Chips} chips");
         ShowYourHand(true);
         ShowDealerHand(true, true);
         End();
@@ -196,11 +203,11 @@ public sealed class Game
 
     void Lose()
     {
-        Console.WriteLine($"\nYou lost! You now have {_you.Chips} chips");
+        _say($"\nYou lost! You now have {_you.Chips} chips");
         ShowYourHand(true);
         ShowDealerHand(true, true);
         if (_you.Chips <= 0)
-            Console.WriteLine("\nYou're out of cash. GAME OVER.");
+            _say("\nYou're out of cash. GAME OVER.");
         else
             End();
     }
@@ -208,7 +215,7 @@ public sealed class Game
     void Tie()
     {
         _you.Reward(_pot.Take());
-        Console.WriteLine($"\nIt's a tie! You now have {_you.Chips} chips");
+        _say($"\nIt's a tie! You now have {_you.Chips} chips");
         ShowYourHand(true);
         ShowDealerHand(true, true);
         End();
@@ -216,16 +223,18 @@ public sealed class Game
 
     void End()
     {
-        Console.WriteLine("\nPlay again? (Y/N)");
+        _say("\nPlay again? (Y/N)");
         while (true)
         {
-            var response = Console.ReadLine()?.ToLower();
+            var response = _getInput().ToLower();
             if (response == "y")
+            {
                 Start();
-            else if (response == "n")
                 break;
-            else
-                Console.WriteLine("Invalid response - Play again? (Y/N)");
+            }
+            if (response == "n")
+                break;
+            _say("Invalid response - Play again? (Y/N)");
         }
     }
 }

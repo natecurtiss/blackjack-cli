@@ -1,3 +1,5 @@
 ﻿using Blackjack;
+using static System.Console;
 
-new Game(100).Start();
+Title = "Blackjack";
+new Game(100, Clear, WriteLine, ReadLine!).Start();

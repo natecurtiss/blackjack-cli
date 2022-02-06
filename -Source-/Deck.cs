@@ -1,4 +1,4 @@
-﻿using static Blackjack.Card;
+﻿using static Blackjack.Rules;
 
 namespace Blackjack;
 
@@ -9,7 +9,6 @@ public sealed class Deck
     public void Reset()
     {
         _cards.Clear();
-        const int suits = 4;
         var suit = new Card[]
         {
             new("Two", 2),
@@ -27,7 +26,7 @@ public sealed class Deck
             new("Ace", 11, 1),
         };
         foreach (var card in suit)
-            for (var i = 0; i < suits; i++)
+            for (var i = 0; i < SUITS; i++)
                 _cards.Add(card.Clone());
     }
 

@@ -32,13 +32,16 @@ public sealed class Card
             return $"an {_name}";
         return $"a {_name}";
     }
+    
+    public Card Clone() => new(_name, PrimaryValue, SecondaryValue);
 
     public Card FaceDown()
     {
         Hide();
         return this;
     }
-    public Card Clone() => new(_name, PrimaryValue, SecondaryValue);
+    
     public void Show() => _isHidden = false;
+    
     void Hide() => _isHidden = true;
 }
