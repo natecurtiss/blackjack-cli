@@ -8,7 +8,7 @@ public sealed class Game
     Card _dealerSecondCard = new("null", 0);
     int _balance;
     int _pot;
-    
+
     public Game(int startingBalance)
     {
         _balance = startingBalance;
