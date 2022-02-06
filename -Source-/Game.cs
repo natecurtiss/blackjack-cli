@@ -1,4 +1,6 @@
-﻿namespace Blackjack;
+﻿using static Blackjack.Rules;
+
+namespace Blackjack;
 
 public sealed class Game
 {
@@ -10,8 +12,6 @@ public sealed class Game
     readonly Action _start;
     readonly Action<string> _say;
     readonly Func<string> _getInput;
-
-    Card _dealerSecondCard = new("null", 0);
 
     public Game(int startingBalance, Action onStart, Action<string> onSay, Func<string> onInput)
     {
@@ -50,10 +50,9 @@ public sealed class Game
                 break;
             }
 
-        Shuffle();
-        Shuffle();
-        Shuffle();
-        Deal(out var didPlayerWin, out var didDealerWin, out _dealerSecondCard);
+        for (var i = 0; i < Rules.SHUFFLES; i++)
+            Shuffle();
+        Deal(out var didPlayerWin, out var didDealerWin);
         if (didPlayerWin && didDealerWin)
         {
             Tie();
@@ -64,7 +63,7 @@ public sealed class Game
         }
         else if (didDealerWin)
         {
-            _dealerSecondCard.Show();
+            _dealer.ShowAllCards();
             Lose();
         }
         else
@@ -78,22 +77,28 @@ public sealed class Game
 
     void Shuffle() => _deck.Shuffle();
 
-    void Deal(out bool didPlayerWin, out bool didDealerWin, out Card dealerSecondCard)
+    void Deal(out bool didPlayerWin, out bool didDealerWin)
     {
-        _you.Give(_deck.Top());
-        _dealer.Give(_deck.Top());
-        _you.Give(_deck.Top(), out didPlayerWin);
-        dealerSecondCard = _deck.Top().FaceDown();
-        _dealer.Give(dealerSecondCard, out didDealerWin);
+        didPlayerWin = false;
+        didDealerWin = false;
+        for (var i = 0; i < STARTING_CARDS; i++)
+            if (i == STARTING_CARDS - 1)
+            {
+                _you.Give(_deck.Top());
+                _dealer.Give(_deck.Top());
+            }
+            else
+            {
+                _you.Give(_deck.Top(), out didPlayerWin);
+                _dealer.Give(_deck.Top().FaceDown(), out didDealerWin);
+            }
     }
 
     void PlayerTurn()
     {
         while (true)
         {
-            _say("\n");
-
-            _say("Please enter a command (hit, stand, or hand).");
+            _say("\nPlease enter a command (hit, stand, or hand).");
             var command = _getInput().ToLower();
             if (command == "hand")
             {
@@ -127,7 +132,7 @@ public sealed class Game
 
     void DealerTurn()
     {
-        _dealerSecondCard.Show();
+        _dealer.ShowAllCards();
         ShowDealerHand(false, true);
         while (true)
         {
@@ -165,7 +170,8 @@ public sealed class Game
     void ShowDealerHand(bool pastTense, bool showMissing)
     {
         var possession = pastTense ? "had" : "has";
-        var total = showMissing ? _dealer.CardsTotal().ToString() : $"{_dealer.CardsTotal() - _dealerSecondCard.PrimaryValue} + ?";
+        // TODO: Fix this.
+        var total = showMissing ? _dealer.CardsTotal().ToString() : $"WHATEVER THE FIRST CARD IS + ?";
         _say($"Dealer {possession} {_dealer.CardNames()} ({total})");
     }
 
