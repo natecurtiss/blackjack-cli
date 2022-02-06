@@ -6,7 +6,19 @@ public sealed class Player
 {
     readonly List<Card> _hand = new();
 
-    public int Total() => _hand.Sum(card => card.Value);
+    public void Reset()
+    {
+        _hand.Clear();
+    }
+
+    public int Total()
+    {
+        var primaryTotal = _hand.Sum(card => card.PrimaryValue);
+        var secondaryTotal = _hand.Sum(card => card.SecondaryValue);
+        if (primaryTotal > 21)
+            return secondaryTotal;
+        return primaryTotal;
+    }
     public string Cards()
     {
         var cards = _hand.Count;

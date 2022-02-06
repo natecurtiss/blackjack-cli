@@ -6,8 +6,6 @@ public sealed class Deck
 {
     readonly List<Card> _cards = new();
 
-    public Deck() => Reset();
-    
     public void Reset()
     {
         _cards.Clear();
@@ -26,11 +24,11 @@ public sealed class Deck
             new("Jack", 10),
             new("Queen", 10),
             new("King", 10),
-            new("Ace", 11),
+            new("Ace", 11, 1),
         };
         foreach (var card in suit)
             for (var i = 0; i < suits; i++)
-                _cards.Add(new(card));
+                _cards.Add(card.Clone());
     }
 
     public void Shuffle() => _cards.Shuffle();

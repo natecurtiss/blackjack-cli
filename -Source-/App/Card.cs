@@ -5,24 +5,25 @@ namespace Blackjack;
 // TODO: Figure out Aces.
 public sealed class Card
 {
-    public readonly int Value;
+    public readonly int PrimaryValue;
+    public readonly int SecondaryValue;
     readonly string _name;
     bool _isHidden;
 
-    public Card(string name, int value, bool isHidden = false)
+    public Card(string name, int value)
     {
         _name = name;
-        Value = value;
-        _isHidden = isHidden;
+        PrimaryValue = value;
+        SecondaryValue = value;
     }
 
-    public Card(Card card)
+    public Card(string name, int primaryValue, int secondaryValue)
     {
-        _name = card._name;
-        Value = card.Value;
-        _isHidden = card._isHidden;
+        _name = name;
+        PrimaryValue = primaryValue;
+        SecondaryValue = secondaryValue;
     }
-    
+
     public override string ToString()
     {
         if (_isHidden)
@@ -33,6 +34,7 @@ public sealed class Card
         return $"a {_name}";
     }
 
+    public Card Clone() => new(_name, PrimaryValue, SecondaryValue);
     public Card FaceDown()
     {
         Hide();
