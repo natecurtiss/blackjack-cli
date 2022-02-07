@@ -138,14 +138,14 @@ public sealed class Game
         _say(_dealer.Hand(Tense.Present));
         while (true)
         {
-            DealerHit(out var didWin, out var didLose);
+            var result = DealerHit();
             if (_dealer.CardsTotal() >= 17)
             {
-                if (didWin)
+                if (result == TurnResult.Lose)
                 {
                     Lose();
                 }
-                else if (didLose)
+                else if (result == TurnResult.Win)
                 {
                     Win();
                 }
@@ -181,11 +181,16 @@ public sealed class Game
         return TurnResult.Continue;
     }
 
-    void DealerHit(out bool didWin, out bool didLose)
+    TurnResult DealerHit()
     {
         var card = _deck.Draw();
         _say($"Dealer drew {card}");
-        _dealer.Give(card, out didWin, out didLose);
+        _dealer.Give(card, out var didWin, out var didLose);
+        if (didWin)
+            return TurnResult.Lose;
+        if (didLose)
+            return TurnResult.Win;
+        return TurnResult.Continue;
     }
 
     void NaturalsWin()
