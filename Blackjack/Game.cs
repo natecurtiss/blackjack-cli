@@ -261,18 +261,18 @@ public sealed class Game
 
     void EndRound()
     {
-        _say("\nPlay again? (Y/N)");
+        _say("\nPlay again?");
         while (true)
         {
             var response = _getStringInput().ToLower();
-            if (response == "y")
+            if (response == "yes")
             {
                 Start();
                 break;
             }
-            if (response == "n")
+            if (response == "no")
                 break;
-            _say("Invalid response - Play again? (Y/N)");
+            _say("Invalid response - Play again?");
         }
     }
 }
