@@ -7,7 +7,8 @@ public sealed class Card
     public readonly int PrimaryValue;
     public readonly int SecondaryValue;
     readonly string _name;
-    bool _isHidden;
+    
+    public bool IsHidden { get; private set; }
 
     public Card(string name, int value)
     {
@@ -25,8 +26,8 @@ public sealed class Card
 
     public override string ToString()
     {
-        if (_isHidden)
-            return "a face down card";
+        if (IsHidden)
+            return "a Face-Down card";
         var startsWithVowel = "aeiou".Contains(ToLower(_name[0]));
         if (startsWithVowel)
             return $"an {_name}";
@@ -41,7 +42,7 @@ public sealed class Card
         return this;
     }
     
-    public void Show() => _isHidden = false;
+    public void Show() => IsHidden = false;
     
-    void Hide() => _isHidden = true;
+    void Hide() => IsHidden = true;
 }

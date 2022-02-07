@@ -1,12 +1,31 @@
 ﻿using System.Text;
+using static Blackjack.Rules;
+using static Blackjack.Tense;
 
 namespace Blackjack;
 
 public abstract class Player
 {
     protected readonly List<Card> _hand = new();
+    protected abstract string Name { get; }
+    protected abstract string PresentTensePossession { get; }
 
     public void Reset() => _hand.Clear();
+
+    public string Hand(Tense tense)
+    {
+        var possession = tense == Past ? "had" : PresentTensePossession;
+        return $"{Name} {possession} {CardNames()} ({VisibleCardsTotal()})";
+    }
+
+    public void Give(Card card) => Give(card, out var _, out var _);
+    public void Give(Card card, out bool didWin) => Give(card, out didWin, out var _);
+    public void Give(Card card, out bool didWin, out bool didLose)
+    {
+        _hand.Add(card);
+        didWin = CardsTotal() == TWENTY_ONE;
+        didLose = CardsTotal() > TWENTY_ONE;
+    }
 
     public int CardsTotal()
     {
@@ -16,8 +35,10 @@ public abstract class Player
             return secondaryTotal;
         return primaryTotal;
     }
-    
-    public string CardNames()
+
+    protected virtual string VisibleCardsTotal() => CardsTotal().ToString();
+
+    string CardNames()
     {
         var cards = _hand.Count;
         var last = cards - 1;
@@ -35,14 +56,4 @@ public abstract class Player
                 sb.Append($"and {_hand[i]}.");
         return sb.ToString();
     }
-
-    public void Give(Card card) => Give(card, out var _, out var _);
-    public void Give(Card card, out bool didWin) => Give(card, out didWin, out var _);
-    public virtual void Give(Card card, out bool didWin, out bool didLose)
-    {
-        _hand.Add(card);
-        didWin = CardsTotal() == 21;
-        didLose = CardsTotal() > 21;
-    }
-    
 }

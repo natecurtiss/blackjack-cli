@@ -11,14 +11,16 @@ public sealed class Game
 
     readonly Action _start;
     readonly Action<string> _say;
-    readonly Func<string> _getInput;
+    readonly Func<string> _getStringInput;
+    readonly Func<string, int> _getIntegerInput;
 
-    public Game(int startingBalance, Action onStart, Action<string> onSay, Func<string> onInput)
+    public Game(int startingBalance, Action onStart, Action<string> onSay, Func<string> onStringInput, Func<string, int> onIntegerInput)
     {
         _you = new(startingBalance);
         _start = onStart;
         _say = onSay;
-        _getInput = onInput;
+        _getStringInput = onStringInput;
+        _getIntegerInput = onIntegerInput;
     }
 
     public void Start()
@@ -28,13 +30,26 @@ public sealed class Game
         _you.Reset();
         _dealer.Reset();
 
+        BettingRound();
+        Shuffle();
+        if (Deal() == TurnResult.Continue)
+        {
+            _say(_you.Hand(Tense.Present));
+            _say(_dealer.Hand(Tense.Present));
+            if (PlayerTurn() == TurnResult.Continue)
+                DealerTurn();
+        }
+    }
+
+    void BettingRound()
+    {
+        var amount = 0;
+        var chips = _you.Chips;
         _say($"How much would you like to bet? (Current balance is {_you.Chips})");
-        while (true)
-            if (!int.TryParse(_getInput(), out var amount))
-            {
-                _say($"Invalid amount - How much would you like to bet? (Current balance is {_you.Chips})");
-            }
-            else if (amount <= 0)
+        while (amount <= 0 || amount > chips)
+        {
+            amount = _getIntegerInput($"Invalid amount - How much would you like to bet? (Current balance is {_you.Chips})");
+            if (amount <= 0)
             {
                 _say($"You have to bet something if you want to play - How much would you like to bet? (Current balance is {_you.Chips})");
             }
@@ -45,83 +60,70 @@ public sealed class Game
             else
             {
                 _pot.Add(amount);
-                _you.Bet(amount, out var _, out var _);
-                _say($"You bet {amount} (current balance is now {_you.Chips})");
-                break;
+                _you.Bet(amount);
+                _say($"You bet {amount}. (Current balance is now {_you.Chips})\n");
             }
-
-        for (var i = 0; i < Rules.SHUFFLES; i++)
-            Shuffle();
-        Deal(out var didPlayerWin, out var didDealerWin);
-        if (didPlayerWin && didDealerWin)
-        {
-            Tie();
-        }
-        else if (didPlayerWin)
-        {
-            Naturals();
-        }
-        else if (didDealerWin)
-        {
-            _dealer.ShowAllCards();
-            Lose();
-        }
-        else
-        {
-            _say("\n");
-            ShowYourHand(false);
-            ShowDealerHand(false, false);
-            PlayerTurn();
         }
     }
 
-    void Shuffle() => _deck.Shuffle();
-
-    void Deal(out bool didPlayerWin, out bool didDealerWin)
+    void Shuffle()
     {
-        didPlayerWin = false;
-        didDealerWin = false;
+        for (var i = 0; i < Rules.SHUFFLES; i++)
+            _deck.Shuffle();
+    }
+
+    TurnResult Deal()
+    {
+        var didPlayerWin = false;
+        var didDealerWin = false;
         for (var i = 0; i < STARTING_CARDS; i++)
-            if (i == STARTING_CARDS - 1)
+            if (i == DEALER_FACE_DOWN_CARD)
             {
-                _you.Give(_deck.Top());
-                _dealer.Give(_deck.Top());
+                _you.Give(_deck.Draw(), out didPlayerWin);
+                _dealer.Give(_deck.Draw().FaceDown(), out didDealerWin);
             }
             else
             {
-                _you.Give(_deck.Top(), out didPlayerWin);
-                _dealer.Give(_deck.Top().FaceDown(), out didDealerWin);
+                _you.Give(_deck.Draw());
+                _dealer.Give(_deck.Draw());
             }
+        if (didPlayerWin && didDealerWin)
+        {
+            NaturalsTie();
+            return TurnResult.Tie;
+        }
+        if (didPlayerWin)
+        {
+            NaturalsWin();
+            return TurnResult.Win;
+        }
+        if (didDealerWin)
+        {
+            NaturalsLose();
+            return TurnResult.Lose;
+        }
+        return TurnResult.Continue;
     }
 
-    void PlayerTurn()
+    TurnResult PlayerTurn()
     {
         while (true)
         {
             _say("\nPlease enter a command (hit, stand, or hand).");
-            var command = _getInput().ToLower();
+            var command = _getStringInput().ToLower();
             if (command == "hand")
             {
-                ShowYourHand(false);
+                _say(_you.Hand(Tense.Present));
             }
             else if (command == "hit")
             {
-                Hit(out var didWin, out var didLose);
-                if (didWin)
-                {
-                    Win();
-                    break;
-                }
-                if (didLose)
-                {
-                    Lose();
-                    break;
-                }
+                var result = Hit();
+                if (result != TurnResult.Continue)
+                    return result;
             }
             else if (command == "stand")
             {
-                DealerTurn();
-                break;
+                return TurnResult.Continue;
             }
             else
             {
@@ -133,7 +135,7 @@ public sealed class Game
     void DealerTurn()
     {
         _dealer.ShowAllCards();
-        ShowDealerHand(false, true);
+        _say(_dealer.Hand(Tense.Present));
         while (true)
         {
             DealerHit(out var didWin, out var didLose);
@@ -156,83 +158,108 @@ public sealed class Game
                     else
                         Tie();
                 }
-                break;
+                return;
             }
-
         }
     }
-    
-    void ShowYourHand(bool pastTense)
-    {
-        var possession = pastTense ? "had" : "have";
-        _say($"You {possession} {_you.CardNames()} ({_you.CardsTotal()})");
-    }
-    void ShowDealerHand(bool pastTense, bool showMissing)
-    {
-        var possession = pastTense ? "had" : "has";
-        // TODO: Fix this.
-        var total = showMissing ? _dealer.CardsTotal().ToString() : $"WHATEVER THE FIRST CARD IS + ?";
-        _say($"Dealer {possession} {_dealer.CardNames()} ({total})");
-    }
 
-    void Hit(out bool didWin, out bool didLose)
+    TurnResult Hit()
     {
-        var card = _deck.Top();
-        _you.Give(card, out didWin, out didLose);
+        var card = _deck.Draw();
+        _you.Give(card, out var didWin, out var didLose);
         _say($"You drew {card}");
+        if (didWin)
+        {
+            Win();
+            return TurnResult.Win;
+        }
+        if (didLose)
+        {
+            Lose();
+            return TurnResult.Lose;
+        }
+        return TurnResult.Continue;
     }
 
     void DealerHit(out bool didWin, out bool didLose)
     {
-        var card = _deck.Top();
+        var card = _deck.Draw();
         _say($"Dealer drew {card}");
         _dealer.Give(card, out didWin, out didLose);
     }
 
-    void Naturals()
+    void NaturalsWin()
     {
         _you.Reward((int) (_pot.Take() * 1.5f));
-        _say($"\nYou won! You now have {_you.Chips} chips");
-        ShowYourHand(true);
-        ShowDealerHand(true, true);
-        End();
+        _say($"You won with naturals! You now have {_you.Chips} chips");
+        _dealer.ShowAllCards();
+        _say(_you.Hand(Tense.Past));
+        _say(_dealer.Hand(Tense.Past));
+        EndRound();
+    }
+
+    void NaturalsLose()
+    {
+        _pot.Empty();
+        _say($"You lost to a Blackjack! You now have {_you.Chips} chips");
+        _dealer.ShowAllCards();
+        _say(_you.Hand(Tense.Past));
+        _say(_dealer.Hand(Tense.Past));
+        if (_you.Chips <= 0)
+            _say("\nYou're out of cash. GAME OVER.");
+        else
+            EndRound();
+    }
+
+    void NaturalsTie()
+    {
+        _you.Reward(_pot.Take());
+        _say($"You and the dealer both tied with a Blackjack! You now have {_you.Chips} chips");
+        _dealer.ShowAllCards();
+        _say(_you.Hand(Tense.Past));
+        _say(_dealer.Hand(Tense.Past));
+        EndRound();
     }
 
     void Win()
     {
         _you.Reward(_pot.Take() * 2);
         _say($"\nYou won! You now have {_you.Chips} chips");
-        ShowYourHand(true);
-        ShowDealerHand(true, true);
-        End();
+        _dealer.ShowAllCards();
+        _say(_you.Hand(Tense.Past));
+        _say(_dealer.Hand(Tense.Past));
+        EndRound();
     }
 
     void Lose()
     {
+        _pot.Empty();
         _say($"\nYou lost! You now have {_you.Chips} chips");
-        ShowYourHand(true);
-        ShowDealerHand(true, true);
+        _dealer.ShowAllCards();
+        _say(_you.Hand(Tense.Past));
+        _say(_dealer.Hand(Tense.Past));
         if (_you.Chips <= 0)
             _say("\nYou're out of cash. GAME OVER.");
         else
-            End();
+            EndRound();
     }
 
     void Tie()
     {
         _you.Reward(_pot.Take());
         _say($"\nIt's a tie! You now have {_you.Chips} chips");
-        ShowYourHand(true);
-        ShowDealerHand(true, true);
-        End();
+        _dealer.ShowAllCards();
+        _say(_you.Hand(Tense.Past));
+        _say(_dealer.Hand(Tense.Past));
+        EndRound();
     }
 
-    void End()
+    void EndRound()
     {
         _say("\nPlay again? (Y/N)");
         while (true)
         {
-            var response = _getInput().ToLower();
+            var response = _getStringInput().ToLower();
             if (response == "y")
             {
                 Start();

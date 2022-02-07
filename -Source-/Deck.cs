@@ -32,7 +32,7 @@ public sealed class Deck
 
     public void Shuffle() => _cards.Shuffle();
 
-    public Card Top()
+    public Card Draw()
     {
         var card = _cards[0];
         _cards.RemoveAt(0);

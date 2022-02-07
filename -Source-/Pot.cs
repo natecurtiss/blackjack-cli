@@ -12,4 +12,6 @@ public sealed class Pot
         _chips = 0;
         return chips;
     }
+
+    public void Empty() => _chips = 0;
 }
