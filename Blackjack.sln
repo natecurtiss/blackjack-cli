@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blackjack", "Blackjack\Blackjack.csproj", "{4361BE7F-9E4B-4A3D-A0FB-43A40C646D75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleBlackjack", "ConsoleBlackjack\ConsoleBlackjack.csproj", "{219831F4-0C3A-4A8F-8509-E04DF9E51352}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console", "Console\Console.csproj", "{219831F4-0C3A-4A8F-8509-E04DF9E51352}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
