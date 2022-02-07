@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blackjack", "Blackjack.csproj", "{97397676-E104-4F88-BB10-04E60EB6360D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blackjack", "Blackjack\Blackjack.csproj", "{4361BE7F-9E4B-4A3D-A0FB-43A40C646D75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleBlackjack", "ConsoleBlackjack\ConsoleBlackjack.csproj", "{219831F4-0C3A-4A8F-8509-E04DF9E51352}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -8,9 +10,13 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{97397676-E104-4F88-BB10-04E60EB6360D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{97397676-E104-4F88-BB10-04E60EB6360D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{97397676-E104-4F88-BB10-04E60EB6360D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{97397676-E104-4F88-BB10-04E60EB6360D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4361BE7F-9E4B-4A3D-A0FB-43A40C646D75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4361BE7F-9E4B-4A3D-A0FB-43A40C646D75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4361BE7F-9E4B-4A3D-A0FB-43A40C646D75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4361BE7F-9E4B-4A3D-A0FB-43A40C646D75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{219831F4-0C3A-4A8F-8509-E04DF9E51352}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{219831F4-0C3A-4A8F-8509-E04DF9E51352}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{219831F4-0C3A-4A8F-8509-E04DF9E51352}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{219831F4-0C3A-4A8F-8509-E04DF9E51352}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
