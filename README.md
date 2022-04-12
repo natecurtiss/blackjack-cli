@@ -1,2 +1,2 @@
-# solo-blackjack
-A small Blackjack/21 game you can play in the terminal window by yourself.
+# blackjack-cli
+A small command like Blackjack game to pass the time with.
